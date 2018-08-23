@@ -1,0 +1,20 @@
+{
+    "name": "karavaev/instagram-viewer",
+    "description": "parse archive with instagram data to show",
+    "type": "project",
+    "prefer-stable": true,
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Andrew Moiseenko",
+            "email": "nekaravaev@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "instagram\\": "src/"
+        }
+    }
+}
