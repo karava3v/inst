@@ -1,0 +1,531 @@
+<script src="https://unpkg.com/frappe-charts@1.1.0/dist/frappe-charts.min.iife.js"></script>
+
+<section class="messages" id="messages">
+    <div class="container">
+        <h2><a href="#messages"># Messages</a></h2>
+
+
+
+        <div class="messages__wrap">
+            <div class="container__msg">
+                <div class="messages__persons">
+                    <ul class="messages__people">
+
+                        {% for im in data.dialogs %}
+
+                                {% if im.participants|length > 2 %}
+
+                                    <li class="messages__person" data-chat="{% for participant in im.participants %}{{ participant.username }}{% endfor %}">
+                                        <img src="https://picsum.photos/200/200/?random" alt="Group" class="messages__person-avatar" />
+                                        <div class="messages__person-text">
+                                            <span class="messages__person-name">{% for participant in im.participants %} {{ participant.username }}{% if not loop.last %}, {% endif %} {% endfor %} @ Group</span>
+                                            <span class="messages__preview">Secret</span>
+                                        </div>
+
+                                    </li>
+
+                                {% else %}
+
+                                    {% for participant in im.participants %}
+
+                                        {% if participant.username != Profile.username %}
+                                            <li class="messages__person" data-chat="{{ participant.username }}">
+                                                <img src="{{ participant.profile_pic_url }}" alt="{{ participant.name }}" class="messages__person-avatar" />
+                                                <div class="messages__person-text">
+                                                    <span class="messages__person-name">{{ participant.name }} @{{ participant.username }}</span>
+                                                    {#<span class="time">2:09 PM</span>#}
+                                                    <span class="messages__preview">Secret</span>
+                                                </div>
+                                            </li>
+                                        {% endif %}
+
+                                    {% endfor %}
+
+                                {% endif %}
+
+                        {% endfor %}
+
+                    </ul>
+                </div>
+                <div class="messages__chats">
+                    <div class="messages__chat-top"><span><img src="{{ Profile.profile_pic_url }}" class="messages__chat-avatar"><span class="messages__chat-name">{% if Profile.name is empty %}@{{ Profile.username }} {% else %} {{ Profile.name }}{% endif %}</span></span></div>
+                    <div class="message__chats-wrap">
+
+
+
+                    {% for im in data.dialogs %}
+                    
+                            {% if im.participants|length > 2 %}
+                    <div class="chat" data-chat="{% for participant in im.participants %}{{ participant.username }}{% endfor %}">
+                            {% else %}
+                                  {% for participant in im.participants %}
+                                    {% if participant.username != Profile.username %}
+                                        <div class="chat" data-chat="{{ participant.username }}">
+                                     {% endif %}
+                                  {% endfor %}
+                            {% endif %}
+
+                            {% for message in im.conversation %}
+
+                                        {#<div class="chat__date">#}
+                                            {#{{ message.created_at|date("d/m/Y h:i") }}#}
+                                        {#</div>#}
+
+                                        <div class="message {% if message.sender != Profile.username %}message--to-me{% else %}message--from-me{% endif %}">
+                                            <span class="message__time">{{ message.created_at|date("d/m/Y h:i") }}</span>
+                                            {% if message.story_share %}
+                                                {{ message.story_share }}
+                                            {% endif %}
+
+                                            {% if message.media %}
+                                                <img class="message__image" src="{{ message.media }}">
+                                            {% endif %}
+                                            {% if message.text %}
+                                                {{ message.text }}
+                                            {% endif %}
+                                        </div>
+                            {% endfor %}
+
+                    </div>
+                    {% endfor %}
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.querySelector('.messages__chats .chat').classList.add('chat--active');
+            document.querySelector('.messages__person:first-of-type').classList.add('messages__person--active');
+
+            document.addEventListener('DOMContentLoaded', () => {
+                console.log('loaded');
+                let containerHeight = document.querySelector('.messages__people').offsetHeight;
+
+                console.log(containerHeight);
+
+                document.querySelector('.messages__chats').style.maxHeight = containerHeight + 'px';
+                document.querySelector('.message__chats-wrap').style.maxHeight = (containerHeight - 69) + 'px';
+            })
+
+
+
+            let friends = {
+                    list: document.querySelector('ul.messages__people'),
+                    all: document.querySelectorAll('.messages__people .messages__person'),
+                    avatar: '',
+                    name: '@nekaravaev'
+                },
+                chat = {
+                    container__msg: document.querySelector('.container__msg .messages__chats'),
+                    current: null,
+                    person: null,
+                    name: document.querySelector('.container__msg .messages__chats .messages__chat-top .messages__chat-name'),
+                    avatar: document.querySelector('.messages__chat-avatar')
+                }
+
+            friends.all.forEach(f => {
+                f.addEventListener('click', () => {
+                    f.classList.contains('messages__person--active') || setAciveChat(f)
+                })
+            });
+
+            function setAciveChat(f) {
+                console.log(f);
+                friends.list.querySelector('.messages__person--active').classList.remove('messages__person--active')
+                f.classList.add('messages__person--active')
+                chat.current = chat.container__msg.querySelector('.chat--active')
+                chat.messages__person = f.getAttribute('data-chat')
+                chat.current.classList.remove('chat--active')
+                chat.container__msg.querySelector('[data-chat="' + chat.messages__person + '"]').classList.add('chat--active')
+                friends.name = f.querySelector('.messages__person-name').innerText
+                friends.avatar = f.querySelector('.messages__person-avatar').getAttribute('src');
+                chat.avatar.setAttribute('src', friends.avatar);
+                chat.name.innerHTML = friends.name;
+            }
+        </script>
+
+        <style>
+
+            :root {
+                --white: #fff;
+                --black: #000;
+                --bg: #f8f8f8;
+                --grey: #999;
+                --dark: #1a1a1a;
+                --light: #e6e6e6;
+                --wrapper: 1000px;
+                --blue: #00b0ff;
+            }
+
+            .messages {
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+            }
+
+            .message__image {
+                max-width: 100%;
+                height: auto;
+                margin: 5px 0;
+            }
+
+            .container__msg {
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                /*max-height: 400px;*/
+                overflow-y: scroll;
+            }
+            .container__msg .messages__persons {
+
+                width: 40%;
+                flex: 1 1 40%;
+                border: 1px solid var(--light);
+                background-color: var(--white);
+            }
+            .container__msg .messages__persons .messages__chat-top {
+                position: relative;
+                width: 100%;
+                height: 96px;
+                padding: 29px;
+            }
+            .container__msg .messages__persons .messages__chat-top:after {
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                display: block;
+                width: 80%;
+                height: 1px;
+                content: '';
+                background-color: var(--light);
+                -webkit-transform: translate(-50%, 0);
+                transform: translate(-50%, 0);
+            }
+            .container__msg .messages__persons input {
+                float: left;
+                width: 188px;
+                height: 42px;
+                padding: 0 15px;
+                border: 1px solid var(--light);
+                background-color: #eceff1;
+                border-radius: 21px;
+                font-family: 'Source Sans Pro', sans-serif;
+                font-weight: 400;
+            }
+            .container__msg .messages__persons input:focus {
+                outline: none;
+            }
+            .container__msg .messages__persons a.search {
+                display: block;
+                float: left;
+                width: 42px;
+                height: 42px;
+                margin-left: 10px;
+                border: 1px solid var(--light);
+                background-color: var(--grey);
+                background-image: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/382994/name-type.png");
+                background-repeat: no-repeat;
+                background-position: top 12px left 14px;
+                border-radius: 50%;
+            }
+            .container__msg .messages__persons .messages__people {
+                margin: 0 0 0 -1px;
+                border-right: 1px solid var(--light);
+                border-left: 1px solid var(--light);
+                width: 100%;
+                padding: 0;
+                overflow-x: hidden;
+            }
+            .messages__chat-avatar {
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+            }
+
+            .messages__chat-name {
+                /* vertical-align: super; */
+                /* display: inline-block; */
+                line-height: 30px;
+                display: inline-block;
+                vertical-align: top;
+                margin-left: 5px;
+            }
+            .container__msg .messages__persons .messages__people .messages__person {
+                position: relative;
+                width: 95%;
+                padding: 12px 0 16px 5%;
+                cursor: pointer;
+                background-color: var(--white);
+                margin: 0;
+                list-style: none;
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+            }
+
+            .messages__person-text {
+                margin-left: 10px;
+            }
+
+            .message__chats-wrap {
+                overflow: scroll;
+            }
+
+            .container__msg .messages__persons .messages__people .messages__person:after {
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                display: block;
+                width: 80%;
+                height: 1px;
+                content: '';
+                background-color: var(--light);
+                -webkit-transform: translate(-50%, 0);
+                transform: translate(-50%, 0);
+            }
+            .container__msg .messages__persons .messages__people .messages__person .messages__person-avatar {
+                /*float: left;*/
+                width: 40px;
+                height: 40px;
+                margin-right: 12px;
+                border-radius: 50%;
+            }
+            .container__msg .messages__persons .messages__people .messages__person .messages__person-name {
+                font-size: 14px;
+                line-height: 22px;
+                color: var(--dark);
+                font-family: 'Source Sans Pro', sans-serif;
+                font-weight: 600;
+            }
+            .container__msg .messages__persons .messages__people .messages__person .time {
+                font-size: 14px;
+                position: absolute;
+                top: 16px;
+                right: 10%;
+                padding: 0 0 5px 5px;
+                color: var(--grey);
+                background-color: var(--white);
+            }
+            .container__msg .messages__persons .messages__people .messages__person .messages__preview {
+                font-size: 14px;
+                display: block;
+                overflow: hidden !important;
+                width: 100%;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                color: var(--grey);
+            }
+            .container__msg .messages__persons .messages__people .messages__person.messages__person--active, .container__msg .messages__persons .messages__people .messages__person:hover {
+                /*margin-top: -1px;*/
+                margin-left: -1px;
+                border: 0;
+                background-color: var(--grey);
+
+                padding: 12px 0 16px 5%;
+            }
+            .container__msg .messages__persons .messages__people .messages__person.messages__person--active span, .container__msg .messages__persons .messages__people .messages__person:hover span {
+                color: var(--white);
+                background: transparent;
+            }
+            .container__msg .messages__persons .messages__people .messages__person.messages__person--active:after, .container__msg .messages__persons .messages__people .messages__person:hover:after {
+                display: none;
+            }
+            .container__msg .messages__chats {
+                position: relative;
+                width: 60%;
+                flex: 1 1 60%;
+                height: 100%;
+            }
+            .container__msg .messages__chats .messages__chat-top {
+                width: 100%;
+                height: auto;
+                padding: 3%;
+                background-color: #eceff1;
+                text-align: center;
+            }
+            .container__msg .messages__chats .messages__chat-top span {
+                font-size: 15px;
+                color: var(--grey);
+            }
+            .container__msg .messages__chats .messages__chat-top span .messages__person-name {
+                color: var(--dark);
+                font-family: 'Source Sans Pro', sans-serif;
+                font-weight: 600;
+            }
+            .container__msg .messages__chats .chat {
+                position: relative;
+                display: none;
+                overflow: hidden;
+                padding: 10px 35px 92px;
+                overflow-y: scroll;
+                border-width: 1px 1px 1px 0;
+                border-style: solid;
+                border-color: var(--light);
+                height: calc(100% - 48px);
+                justify-content: flex-end;
+                flex-direction: column;
+            }
+            .container__msg .messages__chats .chat.chat--active {
+                display: block;
+                display: flex;
+            }
+            .container__msg .messages__chats .chat.chat--active .message {
+                transition-timing-function: cubic-bezier(0.4, -0.04, 1, 1);
+            }
+            .container__msg .messages__chats .chat.chat--active .message:nth-of-type(1) {
+                -webkit-animation-duration: 0.15s;
+                animation-duration: 0.15s;
+            }
+            .container__msg .messages__chats .chat.chat--active .message:nth-of-type(2) {
+                -webkit-animation-duration: 0.3s;
+                animation-duration: 0.3s;
+            }
+            .container__msg .messages__chats .chat.chat--active .message:nth-of-type(3) {
+                -webkit-animation-duration: 0.45s;
+                animation-duration: 0.45s;
+            }
+            .container__msg .messages__chats .chat.chat--active .message:nth-of-type(4) {
+                -webkit-animation-duration: 0.6s;
+                animation-duration: 0.6s;
+            }
+            .container__msg .messages__chats .chat.chat--active .message:nth-of-type(5) {
+                -webkit-animation-duration: 0.75s;
+                animation-duration: 0.75s;
+            }
+            .container__msg .messages__chats .chat.chat--active .message:nth-of-type(6) {
+                -webkit-animation-duration: 0.9s;
+                animation-duration: 0.9s;
+            }
+            .container__msg .messages__chats .chat.chat--active .message:nth-of-type(7) {
+                -webkit-animation-duration: 1.05s;
+                animation-duration: 1.05s;
+            }
+            .container__msg .messages__chats .chat.chat--active .message:nth-of-type(8) {
+                -webkit-animation-duration: 1.2s;
+                animation-duration: 1.2s;
+            }
+            .container__msg .messages__chats .chat.chat--active .message:nth-of-type(9) {
+                -webkit-animation-duration: 1.35s;
+                animation-duration: 1.35s;
+            }
+            .container__msg .messages__chats .chat.chat--active .message:nth-of-type(10) {
+                -webkit-animation-duration: 1.5s;
+                animation-duration: 1.5s;
+            }
+            .container__msg .messages__chats .message {
+                font-size: 16px;
+                position: relative;
+                display: inline-block;
+                clear: both;
+                margin-bottom: 8px;
+                padding: 13px 14px;
+                vertical-align: top;
+                border-radius: 5px;
+            }
+            .container__msg .messages__chats .message:before {
+                position: absolute;
+                top: 19px;
+                display: block;
+                width: 8px;
+                height: 6px;
+                content: '\00a0';
+                -webkit-transform: rotate(29deg) skew(-35deg);
+                transform: rotate(29deg) skew(-35deg);
+            }
+            .container__msg .messages__chats .message.message--to-me {
+                float: left;
+                color: var(--dark);
+                background-color: #eceff1;
+                align-self: flex-start;
+                -webkit-animation-name: slideFromLeft;
+                animation-name: slideFromLeft;
+            }
+            .container__msg .messages__chats .message.message--to-me:before {
+                left: -3px;
+                background-color: #eceff1;
+            }
+            .container__msg .messages__chats .message.message--from-me {
+                float: right;
+                color: var(--dark);
+                background-color: #eceff1;
+                align-self: flex-end;
+                -webkit-animation-name: slideFromRight;
+                animation-name: slideFromRight;
+            }
+            .container__msg .messages__chats .message.message--from-me:before {
+                right: -3px;
+                background-color: #eceff1;
+            }
+            .container__msg .messages__chats .chat__date {
+                position: relative;
+                width: 100%;
+                margin-bottom: 27px;
+                text-align: center;
+            }
+            .container__msg .messages__chats .chat__date span {
+                font-size: 14px;
+                display: inline-block;
+                color: var(--grey);
+            }
+            .container__msg .messages__chats .chat__date span:before, .container__msg .messages__chats .chat__date span:after {
+                position: absolute;
+                top: 10px;
+                display: inline-block;
+                width: 30%;
+                height: 1px;
+                content: '';
+                background-color: var(--light);
+            }
+            .container__msg .messages__chats .chat__date span:before {
+                left: 0;
+            }
+            .container__msg .messages__chats .chat__date span:after {
+                right: 0;
+            }
+
+            @keyframes slideFromLeft {
+                0% {
+                    margin-left: -200px;
+                    opacity: 0;
+                }
+                100% {
+                    margin-left: 0;
+                    opacity: 1;
+                }
+            }
+            @-webkit-keyframes slideFromLeft {
+                0% {
+                    margin-left: -200px;
+                    opacity: 0;
+                }
+                100% {
+                    margin-left: 0;
+                    opacity: 1;
+                }
+            }
+            @keyframes slideFromRight {
+                0% {
+                    margin-right: -200px;
+                    opacity: 0;
+                }
+                100% {
+                    margin-right: 0;
+                    opacity: 1;
+                }
+            }
+            @-webkit-keyframes slideFromRight {
+                0% {
+                    margin-right: -200px;
+                    opacity: 0;
+                }
+                100% {
+                    margin-right: 0;
+                    opacity: 1;
+                }
+            }
+
+        </style>
+
+    </div>
+</section>
