@@ -1,5 +1,3 @@
-<script src="https://unpkg.com/frappe-charts@1.1.0/dist/frappe-charts.min.iife.js"></script>
-
 <section class="messages" id="messages">
     <div class="container">
         <h2><a href="#messages"># Messages</a></h2>
@@ -434,19 +432,29 @@
                 transform: rotate(29deg) skew(-35deg);
             }
             .container__msg .messages__chats .message.message--to-me {
-                float: left;
+                /*float: left;*/
                 color: var(--dark);
                 background-color: #eceff1;
                 align-self: flex-start;
                 -webkit-animation-name: slideFromLeft;
                 animation-name: slideFromLeft;
             }
+            .message.message--to-me .message__time {
+                position: absolute;
+                width: 100%;
+                display: block;
+                white-space: nowrap;
+                font-size: 11px;
+                color: var(--grey);
+                right: -105%;
+                top: 40%;
+            }
             .container__msg .messages__chats .message.message--to-me:before {
                 left: -3px;
                 background-color: #eceff1;
             }
             .container__msg .messages__chats .message.message--from-me {
-                float: right;
+                /*float: right;*/
                 color: var(--dark);
                 background-color: #eceff1;
                 align-self: flex-end;
@@ -468,6 +476,22 @@
                 display: inline-block;
                 color: var(--grey);
             }
+
+            .message {
+                max-width: 60%;
+                position: relative;
+            }
+            .message.message--from-me .message__time {
+                position: absolute;
+                width: 100%;
+                display: block;
+                right: 100px;
+                white-space: nowrap;
+                font-size: 11px;
+                color: var(--grey);
+                top: 40%;
+            }
+
             .container__msg .messages__chats .chat__date span:before, .container__msg .messages__chats .chat__date span:after {
                 position: absolute;
                 top: 10px;
