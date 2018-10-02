@@ -1,0 +1,104 @@
+<section class="media" id="media">
+    <div class="container">
+        <h2><a href="#media"># Photos</a></h2>
+        <p>(click on your profile avatar above to watch your stories)</p>
+
+        <div class="gallery">
+
+            {% for photo in data.photos %}
+                <div class="gallery-item" tabindex="0">
+
+                    <img src="{{ path }}/{{ photo.path }}" class="gallery-image" alt="{{ photo.caption|nl2br }}" data-taken="{{ photo.taken_at }}">
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+    </div>
+</section>
+
+<section class="video" id="video">
+    <div class="container">
+        <h2><a href="#video"># Video</a></h2>
+
+        <div class="gallery">
+
+            {% for video in data.videos %}
+                <div class="gallery-item" tabindex="0">
+
+                    <video class="gallery__video" controls
+                           src="{{ path }}/{{ video.path }}">
+                        Sorry, your browser doesn't support embedded videos.
+                    </video>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+    </div>
+</section>
+
+
+<section class="photos-direct" id="directPhotos">
+    <div class="container">
+        <h2><a href="#directPhotos"># Direct</a></h2>
+
+        <div class="gallery">
+
+            {% for photo in data.direct %}
+                <div class="gallery-item" tabindex="0">
+
+                    <img src="{{ path }}/{{ photo.path }}" class="gallery-image" alt="{{ photo.caption|nl2br }}" data-taken="{{ photo.taken_at }}">
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+    </div>
+</section>
+
+
+
+
+<script>
+    var stories = new Zuck('stories',{
+        id: 'stories',          // timeline container id or reference
+        skin: 'snapgram',      // container class
+        avatars: true,         // shows user photo instead of last story item preview
+        list: false,           // displays a timeline instead of carousel
+        openEffect: true,      // enables effect when opening story - may decrease performance
+        cubeEffect: true,     // enables the 3d cube effect when sliding story - may decrease performance
+        autoFullScreen: false, // enables fullscreen on mobile browsers
+        backButton: true,      // adds a back button to close the story viewer
+        backNative: false,     // uses window history to enable back button on browsers/android
+        previousTap: true,     // use 1/3 of the screen to navigate to previous item when tap the story
+
+        stories: [
+            {
+                id: "nekaravaev",
+                photo: "{{ Profile.profile_pic_url }}",
+                name: "",
+                lastUpdated: "{{ story.taken_at | date('U') }}",      // last updated date in unix time format
+                seen: false,
+                items: [
+                    {% for story in data.stories|reverse %}
+                    {
+                        id: "{{ loop.index }}",       // item id
+                        type: "{% if 'mp4' in story.path %}video{% else %}photo{% endif %}",     // photo or video
+                        length: 3,    // photo timeout or video length in seconds - uses 3 seconds timeout for images if not set
+                        src: "{{ path }}/{{ story.path }}",      // photo or video src
+                        preview: "{% if 'mp4' in story.path %}{{ Profile.profile_pic_url }}{% else %}{{ path }}/{{ story.path }}{% endif %}",  // optional - item thumbnail to show in the story carousel instead of the story defined image
+                        linkText: "{{ story.caption |e('js')}}", // link text
+                        time: "{{ story.taken_at | date('U') }}",     // optional a date to display with the story item. unix timestamp are converted to "time ago" format
+                        seen: false   // set true if current user was read - if local storage is used, you don't need to care about this
+                    },
+                    {% endfor %}
+                ]
+            }
+
+        ],
+    });
+</script>
