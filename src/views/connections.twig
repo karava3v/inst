@@ -1,0 +1,83 @@
+<div class="connections" id="connections">
+    <div class="container">
+        <h2><a href="#connections"># Connections</a></h2>
+        <p>Instagram stores date of yours actions like follow</p>
+
+            {% if data['blocked_users']|length > 0 %}
+                <div class="connections__block">
+                    <h3 class="connections__heading">Blocked users</h3>
+
+                    <ul class="connections__list">
+                        {% for user,time in data['blocked_users'] %}
+                            <li class="connections__item">
+                                <span class="connection__item-user"><a href="https://instagram.com/{{ user }}" class="connection__link">{{ user }}</a></span>
+                                <span class="connections__item-time">{{ time|date('d/m/Y h:i') }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+
+            {% if data['followers']|length > 0 %}
+                <div class="connections__block">
+                    <h3 class="connections__heading">Followers</h3>
+
+                    <ul class="connections__list">
+                        {% for user,time in data['followers'] %}
+                            <li class="connections__item">
+                                <span class="connection__item-user"><a href="https://instagram.com/{{ user }}" class="connection__link">{{ user }}</a></span>
+                                <span class="connections__item-time">{{ time|date('d/m/Y h:i') }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            {% if data.following|length > 0 %}
+                <div class="connections__block">
+                    <h3 class="connections__heading">Following</h3>
+
+                    <ul class="connections__list">
+                        {% for user,time in data.following %}
+                            <li class="connections__item">
+                                <span class="connection__item-user"><a href="https://instagram.com/{{ user }}" class="connection__link">{{ user }}</a></span>
+                                <span class="connections__item-time">{{ time|date('d/m/Y h:i') }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            {% if data.following_hashtags|length > 0 %}
+                <div class="connections__block">
+                    <h3 class="connections__heading">Following hashtags</h3>
+
+                    <ul class="connections__list">
+                        {% for user,time in data.following_hashtags %}
+                            <li class="connections__item">
+                                <span class="connection__item-user"><a href="https://instagram.com/{{ user }}" class="connection__link">{{ user }}</a></span>
+                                <span class="connections__item-time">{{ time|date('d/m/Y h:i') }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            {% if data.follow_requests_sent|length > 0 %}
+                <div class="connections__block">
+                    <h3 class="connections__heading">Follow requests sent</h3>
+
+                    <ul class="connections__list">
+                        {% for user,time in data.follow_requests_sent %}
+                            <li class="connections__item">
+                                <span class="connection__item-user"><a href="https://www.instagram.com/explore/tags/{{ user }}" class="connection__link">{{ user }}</a></span>
+                                <span class="connections__item-time">{{ time|date('d/m/Y h:i') }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+    </div>
+
+</div>
