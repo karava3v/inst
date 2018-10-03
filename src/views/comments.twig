@@ -1,0 +1,99 @@
+<section class="comments" id="comments">
+    <div class="container">
+
+        <h2><a href="#comments"># Comments</a></h2>
+        <p>Instagram doesn't give an media ID for comments, just date-recipient-text. What a shame!</p>
+
+        {% if data.media_comments|length > 0 %}
+
+            <div class="comments__block">
+
+                <p class="comments__heading">Comments to media</p>
+
+                <ul class="comments__list">
+                    {% for comment in data.media_comments %}
+
+                        <li class="comment">
+                            <span class="comment__date">{{ comment[0]|date('d/m/Y h:i') }}</span>
+                            <span class="comment__text">«{{ comment[1] }}»</span>
+                            {% if users[comment[2]].username %}
+                                <span class="comment__recipient-image-block"><img src="{{ users[comment[2]].profile_pic_url }}"/></span>
+                                <span class="comment__recipient">to {{ users[comment[2]].username }}</span>
+                            {% else %}
+                                <span class="comment__recipient">to unknown user</span>
+                            {% endif %}
+
+                        </li>
+
+                    {% endfor %}
+                </ul>
+
+            </div>
+
+        {% endif %}
+
+        {% if data.live_comments|length > 0 %}
+
+        <div class="comments__block">
+
+            <p class="comments__heading">Comments to media</p>
+
+            <ul class="comments__list">
+                {% for comment in data.live_comments %}
+
+                    <li class="comment">
+                        <span class="comment__date">{{ comment[0]|date('d/m/Y h:i') }}</span>
+                        <span class="comment__text">«{{ comment[1] }}»</span>
+                        {% if users[comment[2]].username %}
+                            <span class="comment__recipient-image-block"><img src="{{  users[comment[2]].profile_pic_url }}"/></span>
+                            <span class="comment__recipient">{{  users[comment[2]].username }}</span>
+                        {% else %}
+                            <span class="comment__recipient">to unknown user</span>
+                        {% endif %}
+
+                    </li>
+
+                {% endfor %}
+            </ul>
+
+        </div>
+
+        {% endif %}
+
+        <div class="comments__frequency">
+            <div id="commentsFrequency"></div>
+        </div>
+    </div>
+</section>
+<script>
+    let comments_data = {
+        labels: [
+            {% for to,count in frequency %}
+                "{{ to }}"{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ],
+        datasets: [
+
+                {
+                    name: "Recipients",
+                    values: [{% for to,count in frequency %}{{ count }}{% if not loop.last %},{% endif %}{% endfor %}]
+                }
+
+
+        ]
+    }
+
+    let comments_chart = new frappe.Chart("#commentsFrequency", {  // or a DOM element,
+        // new Chart() in case of ES6 module with above usage
+        title: "Comment frequency by users (top 10)",
+        data: comments_data,
+        type: 'percentage',
+        height: 300,
+        colors: ['#7cd6fd', '#743ee2'],
+        maxSlices: 10,
+        barOptions: {
+            height: 15,          // default: 20
+            depth: 5             // default: 2
+        }
+    })
+</script>
