@@ -1,0 +1,100 @@
+<script src="https://unpkg.com/frappe-charts@1.1.0/dist/frappe-charts.min.iife.js"></script>
+
+<section class="likes" id="likes">
+    <div class="container">
+
+        <h2><a href="#likes"># Likes</a></h2>
+
+        {% if data.media_likes|length > 0 %}
+
+            <div class="likes__block">
+
+                <p class="comments__heading">Likes to media</p>
+
+                <ul class="likes__list">
+                    {% for like in data.media_likes %}
+
+                        <li class="like">
+                            <span class="like__date">{{ like[0]|date('d/m/Y h:i') }}</span>
+
+                            {% if users[like[1]].username %}
+                                <span class="like__recipient-image-block"><img src="{{ users[like[1]].profile_pic_url }}"/></span>
+                                <span class="like__recipient">to <span class="like__recipient-username">{{ users[like[1]].username }}</span></span>
+                            {% else %}
+                                <span class="like__recipient">to unknown user</span>
+                            {% endif %}
+
+                        </li>
+
+                    {% endfor %}
+                </ul>
+
+            </div>
+
+        {% endif %}
+
+        {% if data.comment_likes|length > 0 %}
+
+            <div class="comments__block">
+
+                <p class="comments__heading">Likes to comments</p>
+
+                <ul class="likes__list">
+                    {% for like in data.comment_likes %}
+
+                        <li class="like">
+                            <span class="like__date">{{ like[0]|date('d/m/Y h:i') }}</span>
+
+                            {% if users[like[1]].username %}
+                                <span class="like__recipient-image-block"><img src="{{ users[like[1]].profile_pic_url }}"/></span>
+                                <span class="like__recipient">to <span class="like__recipient-username">{{ users[like[1]].username }}</span></span>
+                            {% else %}
+                                <span class="like__recipient">to unknown user</span>
+                            {% endif %}
+
+                        </li>
+
+                    {% endfor %}
+                </ul>
+
+            </div>
+
+        {% endif %}
+
+        <div class="likes__frequency">
+            <div id="likesFrequency"></div>
+        </div>
+    </div>
+</section>
+<script>
+    let likes_data = {
+        labels: [
+            {% for to,count in frequency %}
+            "{{ to }}"{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ],
+        datasets: [
+
+            {
+                name: "Recipients",
+                values: [{% for to,count in frequency %}{{ count }}{% if not loop.last %},{% endif %}{% endfor %}]
+            }
+
+
+        ]
+    }
+
+    let likes_chart = new frappe.Chart("#likesFrequency", {  // or a DOM element,
+        // new Chart() in case of ES6 module with above usage
+        title: "Likes frequency by users (top 10)",
+        data: likes_data,
+        type: 'percentage',
+        height: 300,
+        colors: ['#7cd6fd', '#743ee2'],
+        maxSlices: 10,
+        barOptions: {
+            height: 15,          // default: 20
+            depth: 5             // default: 2
+        }
+    })
+</script>
