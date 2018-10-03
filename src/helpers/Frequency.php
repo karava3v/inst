@@ -22,7 +22,7 @@ class Frequency
     /** @var array */
     protected $users;
 
-    /** @var $new_profiles array */
+    /** @var array */
     protected $new_profiles = [];
 
     /** @var array */

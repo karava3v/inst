@@ -15,15 +15,9 @@
                     {% for like in data.media_likes %}
 
                         <li class="like">
-                            <span class="like__date">{{ like[0]|date('d/m/Y h:i') }}</span>
-
-                            {% if users[like[1]].username %}
-                                <span class="like__recipient-image-block"><img src="{{ users[like[1]].profile_pic_url }}"/></span>
-                                <span class="like__recipient">to <span class="like__recipient-username">{{ users[like[1]].username }}</span></span>
-                            {% else %}
-                                <span class="like__recipient">to unknown user</span>
-                            {% endif %}
-
+                                <span class="like__date">{{ like[0]|date('d/m/Y h:i') }}</span>
+                                {#<span class="like__recipient-image-block"><img src="{{ users[like[1]].profile_pic_url }}"/></span>#}
+                                <span class="like__recipient">to <span class="like__recipient-username">{{ like[1] }}</span></span>
                         </li>
 
                     {% endfor %}
@@ -44,14 +38,8 @@
 
                         <li class="like">
                             <span class="like__date">{{ like[0]|date('d/m/Y h:i') }}</span>
-
-                            {% if users[like[1]].username %}
-                                <span class="like__recipient-image-block"><img src="{{ users[like[1]].profile_pic_url }}"/></span>
-                                <span class="like__recipient">to <span class="like__recipient-username">{{ users[like[1]].username }}</span></span>
-                            {% else %}
-                                <span class="like__recipient">to unknown user</span>
-                            {% endif %}
-
+                            {#<span class="like__recipient-image-block"><img src="{{ users[like[1]].profile_pic_url }}"/></span>#}
+                            <span class="like__recipient">to <span class="like__recipient-username">{{ like[1] }}</span></span>
                         </li>
 
                     {% endfor %}

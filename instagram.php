@@ -4,10 +4,14 @@ require_once "vendor/autoload.php";
 use instagram\helpers\File;
 use instagram\helpers\Request;
 use instagram\models\Profile;
+use instagram\helpers\Frequency;
 
 const COMMENT_DATE = 0;
 const COMMENT_TEXT = 1;
 const COMMENT_TO = 2;
+
+const LIKE_DATE = 0;
+const LIKE_TO = 1;
 
 $users = []; $likes_new_users = []; $comments_new_users = []; $messages_new_users = [];
 $errors = [];
@@ -65,9 +69,9 @@ $viewsOrder = [
     'searches',
     'messages',
     'contacts',
-    'connections',
-    'likes',
     'comments',
+    'likes',
+    'connections'
 ];
 
 $views = [];
@@ -78,6 +82,7 @@ $ext = pathinfo($zipPath, PATHINFO_EXTENSION);
 $filename = explode('.', $zip);
 
 if ($File->checkExtension($ext) && $File->checkType($zipPath)) {
+
     $path = getcwd() . '/tmp/'. $filename[0];
 
     if (!is_dir($path)) {
@@ -86,6 +91,7 @@ if ($File->checkExtension($ext) && $File->checkType($zipPath)) {
 
     try {
         $path = $File->extractZip($zipPath, $path);
+        echo "✍🏻 Successfully extracted. Processing data.." . PHP_EOL;
     } catch (\ErrorException $exception) {
         echo $exception->getMessage();
     }
@@ -116,6 +122,8 @@ if ( $profile ) {
     $Profile = new Profile;
     $Profile->fill( json_decode( file_get_contents( $profile ), true) );
     $twig->addGlobal('Profile', $Profile);
+
+    echo "🕶 Profile @{$user}, zip is {$zip}" . PHP_EOL;
 } else
     throw new Error('No profile found');
 
@@ -129,6 +137,8 @@ $users[$Profile->username] = $Profile;
 $messages = $File->getPathByFileName($list, 'messages');
 
 if ( $messages ) {
+    echo "📧 Parse messages" . PHP_EOL;
+
     $messages_updated = [];
     $Request          = new Request();
 
@@ -158,6 +168,7 @@ if ( $messages ) {
 $comments = $File->getPathByFileName($list, 'comments');
 
 if ( $comments ) {
+    echo "💭 Parse comments" . PHP_EOL;
 
     if (!isset( $Request ))
         $Request = new Request();
@@ -181,6 +192,8 @@ $likes = $File->getPathByFileName($list, 'likes');
 
 if ( $likes ) {
 
+    echo "💕 Now process likes". PHP_EOL;
+
     $likes_list = json_decode( file_get_contents($likes), true );
 
     if ( !isset( $Request ) )
@@ -199,10 +212,17 @@ if ( $likes ) {
  * Adding new users to global array
  */
 
-$new_users = array_unique(array_merge($messages_new_users, $comments_new_users, $likes_new_users));
+$new_users = array_unique(array_merge($messages_new_users, $comments_new_users));
 
 if ( !empty($new_users) ) {
+
+    $count_new_users = count($new_users);
+    $counter = 0;
+
+    echo "🔍 Found {$comments_new_users} of user profiles. Fetching data from Instagram to load pics, names, etc..." . PHP_EOL;
+
     foreach ( $new_users as $user ) {
+        $counter++;
 
         $Participant = new Profile();
 
@@ -212,7 +232,10 @@ if ( !empty($new_users) ) {
 
             $users[$user]  = $Participant;
 
+            echo "✅ Done with @{$user}! [{$counter}/{$count_new_users}]" . PHP_EOL;
+
         } catch (Exception $e) {
+            echo "🚫 Can't get @{$user}'s profile.  [{$counter}/{$count_new_users}]";
             $errors[] = $e->getMessage();
         }
     }
@@ -221,14 +244,10 @@ if ( !empty($new_users) ) {
 /*
 * for resolving path to static
 */
-$url_path = str_replace(getcwd(), '', $path);
+$url_path = $path;
 
 $twig->addGlobal('path', $url_path);
 $twig->addGlobal('users', $users);
-
-//header
-echo $twig->render('header.twig');
-
 
 /*
  * Custom order for views
@@ -237,6 +256,9 @@ foreach ( $viewsOrder as $view ) {
     $jsonFile = $File->getPathByFileName($list, $view);
     $views[$view] = $jsonFile;
 }
+
+//header
+$html = $twig->render('header.twig');
 
 /**
  * Compile every json to views from /src/views
@@ -247,21 +269,25 @@ foreach ($views as $jsonFileName => $jsonFile) {
 
         switch ($jsonFileName) {
             case ('messages'):
-                echo $twig->render("$jsonFileName.twig", ['data' => $messages_updated]);
+                $html.=$twig->render("$jsonFileName.twig", ['data' => $messages_updated]);
                 break;
             case ('comments'):
-                echo $twig->render("$jsonFileName.twig", ['data' => $comments_list, 'frequency' => $comments_frequency]);
+                $html.=$twig->render("$jsonFileName.twig", ['data' => $comments_list, 'frequency' => $comments_frequency]);
                 break;
             case ('likes'):
-                echo $twig->render("$jsonFileName.twig", ['data' => $likes_list, 'frequency' => $likes_frequency]);
+                $html.=$twig->render("$jsonFileName.twig", ['data' => $likes_list, 'frequency' => $likes_frequency]);
                 break;
             default:
                 $data = json_decode(file_get_contents($jsonFile), true);
-                echo $twig->render("$jsonFileName.twig", ['data' => $data]);
+                $html.=$twig->render("$jsonFileName.twig", ['data' => $data]);
                 break;
         }
     }
 }
 
 //footer
-echo $twig->render('footer.twig');
+$html.=$twig->render('footer.twig');
+
+file_put_contents('result.html', $html);
+
+echo '✨ Done! Check result.html'. PHP_EOL;

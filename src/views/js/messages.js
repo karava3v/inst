@@ -2,11 +2,7 @@ document.querySelector('.messages__chats .chat').classList.add('chat--active');
 document.querySelector('.messages__person:first-of-type').classList.add('messages__person--active');
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('loaded');
     let containerHeight = document.querySelector('.messages__people').offsetHeight;
-
-    console.log(containerHeight);
-
     document.querySelector('.messages__chats').style.maxHeight = containerHeight + 'px';
     document.querySelector('.message__chats-wrap').style.maxHeight = (containerHeight - 69) + 'px';
 })
@@ -34,7 +30,6 @@ friends.all.forEach(f => {
 });
 
 function setAciveChat(f) {
-    console.log(f);
     friends.list.querySelector('.messages__person--active').classList.remove('messages__person--active')
     f.classList.add('messages__person--active')
     chat.current = chat.container__msg.querySelector('.chat--active')

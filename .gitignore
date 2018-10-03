@@ -4,3 +4,4 @@ tmp/
 .php_cs.cache
 *.zip
 instagram-dev.php
+*.html
