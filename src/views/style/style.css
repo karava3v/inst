@@ -1241,6 +1241,36 @@ blockquote p {
     align-items: start;
 }
 
+.connections__list {
+    margin: 2% 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.connections__item {
+    flex: 1 1 15%;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.connections__item-time {
+    font-weight: lighter;
+    font-size: 0.85rem;
+    display: block;
+    margin-top: 20px;
+}
+
+.connection__link {
+    text-decoration: none;
+    color: var(--grey);
+    font-weight: bold;
+}
+
+.connection__item-user {
+}
 /**
  * Footer
  */
