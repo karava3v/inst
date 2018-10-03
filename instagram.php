@@ -9,7 +9,8 @@ const COMMENT_DATE = 0;
 const COMMENT_TEXT = 1;
 const COMMENT_TO = 2;
 
-$users = [];
+$users = []; $likes_new_users = []; $comments_new_users = []; $messages_new_users = [];
+$errors = [];
 
 $File = new File();
 
@@ -19,7 +20,6 @@ $params = array(
     'u:' => 'user:'
 );
 
-$errors = [];
 $zip = null;
 $user = null;
 
@@ -112,13 +112,14 @@ $twig = new Twig_Environment($loader, array(
 
 $profile = $File->getPathByFileName($list, 'profile');
 
-if ($profile) {
+if ( $profile ) {
     $Profile = new Profile;
-    $Profile->fill(json_decode(file_get_contents($profile), true));
+    $Profile->fill( json_decode( file_get_contents( $profile ), true) );
     $twig->addGlobal('Profile', $Profile);
-} else {
+} else
     throw new Error('No profile found');
-}
+
+$users[$Profile->username] = $Profile;
 
 
 /**
@@ -127,44 +128,26 @@ if ($profile) {
 
 $messages = $File->getPathByFileName($list, 'messages');
 
-if ($messages) {
+if ( $messages ) {
     $messages_updated = [];
     $Request          = new Request();
 
-    $messages = json_decode(file_get_contents($messages), true);
+    $messages = json_decode( file_get_contents( $messages ), true );
 
     foreach ($messages as $chat) {
-        $participants = [];
 
-        foreach ($chat['participants']  as $participant) {
-            if ($participant !== $Profile->username) {
-                if (array_key_exists($participant, $users)) {
-                    $participants[$participant] = $users[$participant];
-                } else {
-                    $Participant = new Profile();
-                    try {
-                        $participant_data = $Participant->setRequest($Request)->getFromInstagram($participant);
-                        $Participant->Fill($participant_data);
+        foreach ( $chat['participants']  as $participant) {
 
-                        //TODO: rename variables so PARTICIPANTS PARTICIPANTS PARTICIPANTS everywhere
-                        $users[$participant]        = $Participant;
-                        $participants[$participant] = $Participant;
-                    } catch (Exception $e) {
-//                        echo $e->getMessage();
-                        $participants[$participant] = [];
-                    }
-                }
-            } else {
-                $participants[$participant] = $Profile;
+            if (! $Profile->searchInList($participant, $users)) {
+                $messages_new_users[] = $participant;
             }
         }
 
-        $messages_updated['dialogs'][] = [
-            'participants' => $participants,
-            'conversation' => $chat['conversation']
+        $messages_updated[] = [
+            'participants' => $chat['participants'],
+            'conversation' => array_reverse($chat['conversation'], true)
         ];
     }
-    $messages_updated['profiles'] = $users;
 }
 
 /**
@@ -174,60 +157,66 @@ if ($messages) {
 
 $comments = $File->getPathByFileName($list, 'comments');
 
-if ($comments) {
-    $comments_frequency = [];
+if ( $comments ) {
 
-    if (!isset($Request)) {
+    if (!isset( $Request ))
         $Request = new Request();
-    }
 
-    $comments = json_decode(file_get_contents($comments), true);
+    $comments_list = json_decode( file_get_contents($comments), true );
 
-    foreach ($comments as $commentsCategory => $commentsList) {
-        foreach ($commentsList as $commentID => $comment) {
-            if ($comment[COMMENT_TO] !== $Profile->username) {
+    $CommentsFrequency = new Frequency( $comments_list, $Request, COMMENT_TO );
 
-                //count frequency
-                if (isset($comments_frequency[$comment[COMMENT_TO]])) {
-                    $comments_frequency[$comment[COMMENT_TO]]++;
-                } else {
-                    $comments_frequency[$comment[COMMENT_TO]] = 1;
-                }
+    $CommentsFrequency->setUsers($users);
 
-                if (array_key_exists($comment[COMMENT_TO], $users)) {
-                    $comments[$commentsCategory][$commentID][COMMENT_TO] = $users[$comment[COMMENT_TO]];
-                } else {
-                    $RecipientProfile = new Profile();
+    $comments_frequency = $CommentsFrequency->calculate();
 
-                    try {
-                        $recipient_data = $RecipientProfile->setRequest($Request)->getFromInstagram($comment[COMMENT_TO]);
-                        $RecipientProfile->Fill($recipient_data);
-
-                        //TODO: rename variables so PARTICIPANTS PARTICIPANTS PARTICIPANTS everywhere
-                        $users[$comment[COMMENT_TO]] = $RecipientProfile;
-                        $comments[$commentsCategory][$commentID][COMMENT_TO]  = $RecipientProfile;
-                    } catch (Exception $e) {
-//                        echo $e->getMessage();
-                        $comments[$commentsCategory][$commentID][COMMENT_TO] = [];
-                    }
-                }
-            } else {
-                $comments[$commentsCategory][$commentID][COMMENT_TO] = $Profile;
-            }
-        }
-    }
-
-    arsort($comments_frequency);
-    $comments_frequency = array_slice($comments_frequency, 0, 10);
-
-    $comments = [
-        'list' => $comments,
-        'frequency' => $comments_frequency
-    ];
+    $comments_new_users = $CommentsFrequency->searchUsers( $user );
 }
 
-$t = $comments;
+/**
+ * Likes
+ */
 
+$likes = $File->getPathByFileName($list, 'likes');
+
+if ( $likes ) {
+
+    $likes_list = json_decode( file_get_contents($likes), true );
+
+    if ( !isset( $Request ) )
+        $Request = new Request();
+
+    $LikesFrequency = new Frequency( $likes_list, $Request, LIKE_TO );
+
+    $LikesFrequency->setUsers($users);
+
+    $likes_frequency = $LikesFrequency->calculate();
+
+    $likes_new_users = $LikesFrequency->searchUsers( $user );
+}
+
+/*
+ * Adding new users to global array
+ */
+
+$new_users = array_unique(array_merge($messages_new_users, $comments_new_users, $likes_new_users));
+
+if ( !empty($new_users) ) {
+    foreach ( $new_users as $user ) {
+
+        $Participant = new Profile();
+
+        try {
+            $participant_data = $Participant->setRequest( $Request )->getFromInstagram($user);
+            $Participant->Fill( $participant_data );
+
+            $users[$user]  = $Participant;
+
+        } catch (Exception $e) {
+            $errors[] = $e->getMessage();
+        }
+    }
+}
 
 /*
 * for resolving path to static
@@ -235,6 +224,7 @@ $t = $comments;
 $url_path = str_replace(getcwd(), '', $path);
 
 $twig->addGlobal('path', $url_path);
+$twig->addGlobal('users', $users);
 
 //header
 echo $twig->render('header.twig');
@@ -243,7 +233,7 @@ echo $twig->render('header.twig');
 /*
  * Custom order for views
  */
-foreach ($viewsOrder as $view) {
+foreach ( $viewsOrder as $view ) {
     $jsonFile = $File->getPathByFileName($list, $view);
     $views[$view] = $jsonFile;
 }
@@ -252,13 +242,18 @@ foreach ($viewsOrder as $view) {
  * Compile every json to views from /src/views
  */
 foreach ($views as $jsonFileName => $jsonFile) {
-    if (file_exists(getcwd() . "/src/views/$jsonFileName.twig")) {
+
+    if ( file_exists(getcwd() . "/src/views/$jsonFileName.twig") ) {
+
         switch ($jsonFileName) {
             case ('messages'):
                 echo $twig->render("$jsonFileName.twig", ['data' => $messages_updated]);
                 break;
             case ('comments'):
-                echo $twig->render("$jsonFileName.twig", ['data' => $comments]);
+                echo $twig->render("$jsonFileName.twig", ['data' => $comments_list, 'frequency' => $comments_frequency]);
+                break;
+            case ('likes'):
+                echo $twig->render("$jsonFileName.twig", ['data' => $likes_list, 'frequency' => $likes_frequency]);
                 break;
             default:
                 echo $twig->render("$jsonFileName.twig", ['data' => json_decode(file_get_contents($jsonFile))]);

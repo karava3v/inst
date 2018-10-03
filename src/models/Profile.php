@@ -295,5 +295,17 @@ class Profile
     {
         $this->business_facebook_page_name = $business_facebook_page_name;
     }
-    
+
+
+    /**
+     *
+     * @param $username string username for search
+     * @param $list Profile[] all initialized profiles
+     *
+     * @return boolean
+     */
+    public function searchInList($username, $list) {
+        return array_key_exists($username, $list);
+    }
+
 }
