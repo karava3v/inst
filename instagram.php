@@ -219,7 +219,7 @@ if ( !empty($new_users) ) {
     $count_new_users = count($new_users);
     $counter = 0;
 
-    echo "🔍 Found {$comments_new_users} of user profiles. Fetching data from Instagram to load pics, names, etc..." . PHP_EOL;
+    echo "🔍 Found {$count_new_users} of user profiles. Fetching data from Instagram to load pics, names, etc..." . PHP_EOL;
 
     foreach ( $new_users as $user ) {
         $counter++;
