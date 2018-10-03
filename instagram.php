@@ -256,7 +256,8 @@ foreach ($views as $jsonFileName => $jsonFile) {
                 echo $twig->render("$jsonFileName.twig", ['data' => $likes_list, 'frequency' => $likes_frequency]);
                 break;
             default:
-                echo $twig->render("$jsonFileName.twig", ['data' => json_decode(file_get_contents($jsonFile))]);
+                $data = json_decode(file_get_contents($jsonFile), true);
+                echo $twig->render("$jsonFileName.twig", ['data' => $data]);
                 break;
         }
     }
