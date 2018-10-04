@@ -104,6 +104,17 @@ strong {
     font-weight: bolder;
 }
 
+a {
+    color: var(--grey);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+h2 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+
 /**
  * 1. Correct the inheritance and scaling of font size in all browsers.
  * 2. Correct the odd `em` font sizing in all browsers.

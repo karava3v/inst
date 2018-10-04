@@ -1,3 +1,4 @@
+{% if data.media|length > 0 %}
 <section class="media" id="media">
     <div class="container">
         <h2><a href="#media"># Photos</a></h2>
@@ -17,7 +18,9 @@
         </div>
     </div>
 </section>
+{% endif %}
 
+{% if data.videos|length > 0 %}
 <section class="video" id="video">
     <div class="container">
         <h2><a href="#video"># Video</a></h2>
@@ -39,8 +42,10 @@
         </div>
     </div>
 </section>
+{% endif %}
 
 
+{% if data.direct|length > 0 %}
 <section class="photos-direct" id="directPhotos">
     <div class="container">
         <h2><a href="#directPhotos"># Direct</a></h2>
@@ -59,7 +64,7 @@
         </div>
     </div>
 </section>
-
+{% endif %}
 
 
 
