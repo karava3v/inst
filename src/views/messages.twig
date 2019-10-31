@@ -64,10 +64,6 @@
 
                             {% for message in im.conversation %}
 
-                                        {#<div class="chat__date">#}
-                                            {#{{ message.created_at|date("d/m/Y h:i") }}#}
-                                        {#</div>#}
-
                                         <div class="message {% if message.sender != Profile.username %}message--to-me{% else %}message--from-me{% endif %}">
                                             <span class="message__time">{{ message.created_at|date("d/m/Y h:i") }}</span>
                                             {% if message.story_share %}
