@@ -70,7 +70,7 @@
         ]
     }
 
-    let likes_chart = new frappe.Chart("#likesFrequency", {  // or a DOM element,
+    const likes_chart = new frappe.Chart("#likesFrequency", {  // or a DOM element,
         // new Chart() in case of ES6 module with above usage
         title: "Likes frequency by users (top 10)",
         data: likes_data,
