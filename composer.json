@@ -12,7 +12,7 @@
     ],
     "minimum-stability": "dev",
     "require": {
-        "twig/twig": "^2.0"
+        "twig/twig": "^3.11"
     },
     "autoload": {
         "psr-4": {
